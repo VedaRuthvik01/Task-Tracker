@@ -1,0 +1,29 @@
+// routes/task.js
+router.post('/project', authMiddleware, async (req, res) => {
+  const count = await Project.countDocuments({ userId: req.user.id });
+  if (count >= 4) return res.status(400).send("Max 4 projects allowed");
+  const project = new Project({ name: req.body.name, userId: req.user.id });
+  await project.save();
+  res.json(project);
+});
+
+router.post('/task', authMiddleware, async (req, res) => {
+  const task = new Task({ ...req.body });
+  await task.save();
+  res.json(task);
+});
+
+router.get('/tasks/:projectId', authMiddleware, async (req, res) => {
+  const tasks = await Task.find({ projectId: req.params.projectId });
+  res.json(tasks);
+});
+
+router.put('/task/:id', authMiddleware, async (req, res) => {
+  const task = await Task.findByIdAndUpdate(req.params.id, req.body);
+  res.json(task);
+});
+
+router.delete('/task/:id', authMiddleware, async (req, res) => {
+  await Task.findByIdAndDelete(req.params.id);
+  res.send("Deleted");
+});
